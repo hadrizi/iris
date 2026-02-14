@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstdint>
 #include <algorithm>
+#include <cmath>
 
 namespace iris {
 
@@ -33,6 +34,38 @@ struct Canvas {
 
     void fill(pixel_t col) {
         std::fill(pixels.begin(), pixels.end(), col);
+    }
+
+    void line(pixel_t col, int x0, int y0, int x1, int y1) {
+        int dx = x1 - x0;
+        int dy = y1 - y0;
+
+        if (dx == 0 && dy == 0) {
+            put_pixel(col, x1, y1);
+            return;
+        }
+
+        if (abs(dx) > abs(dy)) {
+            if (x0 > x1) {
+                std::swap(x0, x1);
+                std::swap(y0, y1);
+            }
+
+            for (int x = x0; x <= x1; x++) {
+                int y = dy * (x - x0) / dx + y0;
+                put_pixel(col, x, y);
+            }
+        } else {
+            if (y0 > y1) {
+                std::swap(x0, x1);
+                std::swap(y0, y1);
+            }
+
+            for (int y = y0; y <= y1; y++) {
+                int x = dx * (y - y0) / dy + x0;
+                put_pixel(col, x, y);
+            }
+        }
     }
 
     void flip_horizontally() {
