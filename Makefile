@@ -1,6 +1,6 @@
 cc         = g++
 cc_version = 20
-cc_flags   = -Wextra -Wall -pedantic -O3 -std=c++$(cc_version)
+cc_flags   = -g -Wextra -Wall -pedantic -std=c++$(cc_version)
 
 project      = iris
 build_folder = build/
@@ -15,4 +15,5 @@ all: $(project)
 
 clear:
 	rm -rf $(build_folder)
+	rm -rf log.txt
 	rm -rf *.ppm

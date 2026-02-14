@@ -5,24 +5,29 @@
 #include <sstream>
 
 #include "graphics.hpp"
+#include "math.hpp"
 
-struct Vector2 {
-    int x, y;
+constexpr size_t width  = 800;
+constexpr size_t height = 800;
 
-    Vector2(int x_, int y_): x(x_), y(y_) {}
-};
+// Helper color consts
+constexpr uint32_t red    = 0xFF000000;
+constexpr uint32_t green  = 0x00FF0000;
+constexpr uint32_t blue   = 0x0000FF00;
+constexpr uint32_t white  = 0xFFFFFFFF;
+constexpr uint32_t black  = 0x00000000;
 
-std::vector<Vector2> load_obj(const char* filename) {
+std::vector<iris::Vector2> load_obj(const char* filename) {
     std::ifstream f(filename);
     std::string line;
 
     std::vector<double> x_array;
     std::vector<double> y_array;
 
-    double l, r = 0; // min and max x values
-    double b, t = 0; // min and max y values
+    double l = 1000., r = 0.; // min and max x values
+    double b = 1000., t = 0.; // min and max y values
 
-    std::vector<Vector2> out;
+    std::vector<iris::Vector2> out;
 
     while (std::getline(f, line)) {
         if (!line.starts_with("v ")) continue;
@@ -30,8 +35,7 @@ std::vector<Vector2> load_obj(const char* filename) {
         std::istringstream iss(line.substr(2));
         double x, y;
 
-        iss >> x;
-        iss >> y;
+        iss >> x >> y;
 
         x_array.push_back(x);
         y_array.push_back(y);
@@ -44,26 +48,26 @@ std::vector<Vector2> load_obj(const char* filename) {
     }
 
     for (size_t i = 0; i < x_array.size(); i++) {
-        double normalized_x = (x_array[i] - l) / (r - l);
-        double normalized_y = (y_array[i] - b) / (t - b);
+        double normalized_x = ((2 * x_array[i]) / (r - l)) - ((r + l) / (r - l));
+        double normalized_y = ((2 * y_array[i]) / (t - b)) - ((t + b) / (t - b));
 
-        out.push_back(Vector2(normalized_x, normalized_y));
+        out.push_back(iris::Vector2(normalized_x, normalized_y));
     }
 
     return out;
 }
 
-int main(int argc, char** argv) {
-    size_t width  = 3;
-    size_t height = 2;
-    std::vector<iris::pixel_t> pixels(width * height);
-    
-    iris::put_pixel(pixels, 255, 0,   0,   0, 0);
-    iris::put_pixel(pixels, 0,   255, 0,   0, 1);
-    iris::put_pixel(pixels, 0,   0,   255, 0, 2);
-    iris::put_pixel(pixels, 255, 255, 255, 0, 3);
-    iris::put_pixel(pixels, 0,   255, 255, 0, 4);
-    iris::put_pixel(pixels, 0,   0,   0,   0, 5);
+int main() {
+    iris::Canvas canvas(width, height, black);
 
-    iris::output_pixels_to_image(pixels, width, height, "out.ppm");
+    std::vector<iris::Vector2> vertices = load_obj("assets/teapot.obj");
+    for (const iris::Vector2& v: vertices) {
+        size_t x = width  / 2 * (v.x + 1.);
+        size_t y = height / 2 * (v.y + 1.);
+
+        canvas.put_pixel(white, x, y);
+    }
+
+    canvas.flip_horizontally();
+    iris::output_canvas_to_image(canvas, "out.ppm");
 }

@@ -6,51 +6,47 @@
 #include <fstream>
 #include <vector>
 #include <cstdint>
+#include <algorithm>
 
 namespace iris {
 
 typedef uint32_t pixel_t;
 
-void put_pixel(
-    std::vector<pixel_t>& pixels,
-    uint8_t r, uint8_t g, uint8_t b, uint8_t a,
-    size_t idx
-) {
-    pixel_t pixel_val = r;
-    pixel_val = pixel_val | (g <<  8);
-    pixel_val = pixel_val | (b << 16);
-    pixel_val = pixel_val | (a << 24);
+struct Canvas {
+    size_t width, height;
+    std::vector<pixel_t> pixels;
 
-    pixels[idx] = pixel_val;
-}
+    Canvas()
+        : width(0), height(0) {};
+    Canvas(size_t width_, size_t height_)
+        : width(width_), height(height_), pixels(width_ * height_) {};
+    Canvas(size_t width_, size_t height_, pixel_t col)
+        : width(width_), height(height_), pixels(width_ * height_, col) {};
+        
+    void put_pixel(pixel_t col, size_t idx) {
+        pixels[idx] = col;
+    }
 
-uint8_t get_r(pixel_t pixel) {
-    return (uint8_t)(pixel & 0xFF);
-}
+    void put_pixel(pixel_t col, size_t x, size_t y) {
+        pixels[width * y + x] = col;
+    }
 
-uint8_t get_g(pixel_t pixel) {
-    return (uint8_t)((pixel >> 8) & 0xFF);
-}
+    void fill(pixel_t col) {
+        std::fill(pixels.begin(), pixels.end(), col);
+    }
 
-uint8_t get_b(pixel_t pixel) {
-    return (uint8_t)((pixel >> 16) & 0xFF);
-}
+    void flip_horizontally() {
+        std::reverse(pixels.begin(), pixels.end());
+    }
+}; // Canvas
 
-uint8_t get_a(pixel_t pixel) {
-    return (uint8_t)((pixel >> 24) & 0xFF);
-}
-
-void output_pixels_to_image(
-    std::vector<pixel_t>& pixels,
-    size_t width, size_t height,
-    const char* filename
-) {
+void output_canvas_to_image(Canvas canvas, const char* filename) {
     std::ofstream f;
-    f.open(filename);
-    f << "P6\n" << width << " " << height << "\n255\n";
+    f.open(filename, std::ios::binary);
+    f << "P6\n" << canvas.width << " " << canvas.height << "\n255\n";
 
-    for (size_t idx = 0; idx < width * height; idx++) {
-        f << get_r(pixels[idx]) << get_g(pixels[idx]) << get_b(pixels[idx]);
+    for (const pixel_t& p: canvas.pixels) {
+        f << (uint8_t)((p >> 24) & 0xFF) << (uint8_t)((p >> 16) & 0xFF) << (uint8_t)((p >> 8) & 0xFF);
     }
 
     f.close();
