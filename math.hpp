@@ -37,7 +37,7 @@ typedef Vector3<int>    Vector3i;
 typedef Vector3<double> Vector3f;
 
 // TODO: should be a part of the future Scene object prolly
-Vector2i project_vert(Vector3f vert, size_t canvas_width, size_t canvas_height) {
+Vector2i project_vert_orthogonally(Vector3f vert, size_t canvas_width, size_t canvas_height) {
     return Vector2i(
         canvas_width  / 2 * (vert.x + 1.),
         canvas_height / 2 * (vert.y + 1.)

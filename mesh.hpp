@@ -11,9 +11,11 @@
 
 namespace iris {
 
+typedef std::tuple<size_t, size_t, size_t> face_t;
+
 struct Mesh {
     std::vector<iris::Vector3f> vertices;
-    std::vector<std::tuple<size_t, size_t, size_t>> faces;
+    std::vector<face_t> faces;
 
     void load_from_obj(const char* filename) {
         vertices.clear();
@@ -51,10 +53,19 @@ struct Mesh {
         }
     }
 
-    void normalize() {
+    void transform_to_ndc() {
         for (iris::Vector3f& v: vertices) {
             v.x = (l < -1) || (r > 1) ? ((2 * v.x) / (r - l)) - ((r + l) / (r - l)) : v.x;
             v.y = (b < -1) || (t > 1) ? ((2 * v.y) / (t - b)) - ((t + b) / (t - b)) : v.y;
+        }
+    }
+
+    const iris::Vector3f& get_face_vert(face_t face, size_t idx) const {
+        switch (idx) {
+            case 0: return vertices[std::get<0>(face) - 1];
+            case 1: return vertices[std::get<1>(face) - 1];
+            case 2: return vertices[std::get<2>(face) - 1];
+            default: throw std::out_of_range("Invalid face index");
         }
     }
 private:

@@ -24,19 +24,19 @@ int main() {
 
     iris::Mesh mesh;
     mesh.load_from_obj("assets/teapot.obj");
-    mesh.normalize();
+    mesh.transform_to_ndc();
     
-    for (const auto face: mesh.faces) {
-        iris::Vector2i v0 = iris::project_vert(
-            mesh.vertices[std::get<0>(face) - 1],
+    for (const auto& face: mesh.faces) {
+        iris::Vector2i v0 = iris::project_vert_orthogonally(
+            mesh.get_face_vert(face, 0),
             canvas.width, canvas.height
         );
-        iris::Vector2i v1 = iris::project_vert(
-            mesh.vertices[std::get<1>(face) - 1],
+        iris::Vector2i v1 = iris::project_vert_orthogonally(
+            mesh.get_face_vert(face, 1),
             canvas.width, canvas.height
         );
-        iris::Vector2i v2 = iris::project_vert(
-            mesh.vertices[std::get<2>(face) - 1],
+        iris::Vector2i v2 = iris::project_vert_orthogonally(
+            mesh.get_face_vert(face, 2),
             canvas.width, canvas.height
         );
         
