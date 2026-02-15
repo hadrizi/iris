@@ -9,6 +9,7 @@
 #include "math.hpp"
 #include "mesh.hpp"
 
+// Game configs; should be moved to some kind of Game object in the future
 constexpr size_t width  = 800;
 constexpr size_t height = 800;
 
@@ -20,7 +21,8 @@ constexpr uint32_t white  = 0xFFFFFFFF;
 constexpr uint32_t black  = 0x00000000;
 
 int main() {
-    iris::Canvas canvas(width, height, black);
+    iris::Canvas canvas(width, height);
+    canvas.fill(black);
 
     iris::Mesh mesh;
     mesh.load_from_obj("assets/teapot.obj");

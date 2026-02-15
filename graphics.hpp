@@ -18,17 +18,17 @@ struct Canvas {
     std::vector<pixel_t> pixels;
 
     Canvas()
-        : width(0), height(0) {};
+        : width(0), height(0), pixels(0) {};
     Canvas(size_t width_, size_t height_)
-        : width(width_), height(height_), pixels(width_ * height_) {};
-    Canvas(size_t width_, size_t height_, pixel_t col)
-        : width(width_), height(height_), pixels(width_ * height_, col) {};
+        : width(width_), height(height_), pixels(width_ * height_, 0) {};
         
     void put_pixel(pixel_t col, size_t idx) {
+        if (idx >= pixels.size()) return;
         pixels[idx] = col;
     }
 
     void put_pixel(pixel_t col, size_t x, size_t y) {
+        if (!_is_in_bounds(x, y)) return;
         pixels[width * y + x] = col;
     }
 
@@ -86,7 +86,13 @@ struct Canvas {
     }
 
     void flip_horizontally() {
+        // it's a hack for sure but it's cheap and it works
         std::reverse(pixels.begin(), pixels.end());
+    }
+
+private:
+    bool _is_in_bounds(int x, int y) {
+        return 0 <= x && x < (int)width && 0 <= y && y < (int)height;
     }
 }; // Canvas
 
