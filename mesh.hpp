@@ -17,6 +17,8 @@ struct Mesh {
     std::vector<iris::Vector3f> vertices;
     std::vector<face_t> faces;
 
+    Mesh(): vertices(0), faces(0) {}
+
     void load_from_obj(const char* filename) {
         vertices.clear();
         faces.clear();
