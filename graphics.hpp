@@ -68,6 +68,12 @@ struct Canvas {
         }
     }
 
+    void triangle( pixel_t col, int x0, int y0, int x1, int y1, int x2, int y2) {
+        line(white, x0, y0, x1, y1);
+        line(white, x1, y1, x2, y2);
+        line(white, x2, y2, x0, y0);
+    }
+
     void flip_horizontally() {
         std::reverse(pixels.begin(), pixels.end());
     }
