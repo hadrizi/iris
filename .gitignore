@@ -2,3 +2,5 @@ build/*
 .vscode/*
 log.txt
 *.ppm
+out/*
+*.gif

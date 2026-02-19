@@ -1,6 +1,6 @@
 cc         = g++
 cc_version = 20
-cc_flags   = -g -Wextra -Wall -pedantic -std=c++$(cc_version)
+cc_flags   = -g -fsanitize=address -fsanitize=leak -Wextra -Wall -pedantic -std=c++$(cc_version)
 
 project      = iris
 build_folder = build/
@@ -11,9 +11,13 @@ $(project):
 
 all: $(project)
 
-.PHONY: clear
+.PHONY: gif
+gif:
+	ffmpeg -framerate 60 -i out/out%d.ppm -vf "setpts=0.01*PTS,fps=60,scale=800:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" out/out.gif
+# 	ffmpeg -i out/out%d.ppm -vf "setpts=0.5*PTS,fps=60,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" out/out.gif
 
+.PHONY: clear
 clear:
 	rm -rf $(build_folder)
 	rm -rf log.txt
-	rm -rf *.ppm
+	rm -rf out/*

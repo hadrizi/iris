@@ -53,6 +53,26 @@ struct Mesh {
             }
             
         }
+    
+        std::vector<std::pair<double, face_t>> temp;
+
+        for (const auto& f : faces) {
+            double max_z = std::max({
+                vertices[std::get<0>(f) - 1].z,
+                vertices[std::get<1>(f) - 1].z,
+                vertices[std::get<2>(f) - 1].z
+            });
+            temp.push_back({max_z, f});
+        }
+
+        std::sort(temp.begin(), temp.end(),
+                [](const auto& a, const auto& b) {
+                    return a.first < b.first;
+                });
+
+        faces.clear();
+        for (const auto& [_, f] : temp)
+            faces.push_back(f);
     }
 
     void transform_to_ndc() {
