@@ -2,6 +2,7 @@
 #define IRIS_MATH_H_
 
 #include <iostream>
+#include <cmath>
 
 namespace iris {
 
@@ -37,10 +38,27 @@ typedef Vector3<int>    Vector3i;
 typedef Vector3<double> Vector3f;
 
 // TODO: should be a part of the future Scene object prolly
-Vector2i project_vert_orthogonally(Vector3f vert, size_t canvas_width, size_t canvas_height) {
-    return Vector2i(
+Vector3i project_vert_orthogonally(Vector3f vert, size_t canvas_width, size_t canvas_height, size_t far_plane) {
+    return Vector3i(
         canvas_width  / 2 * (vert.x + 1.),
-        canvas_height / 2 * (vert.y + 1.)
+        canvas_height / 2 * (vert.y + 1.),
+        far_plane     / 2 * (vert.z + 1.)
+    );
+}
+
+Vector3f rotate_vert_y(Vector3f vert, double angle) {
+    return Vector3f(
+         cos(angle) * vert.x + sin(angle) * vert.z,
+         vert.y,
+        -sin(angle) * vert.x + cos(angle) * vert.z
+    );
+}
+
+Vector3f project_vert_perspective(Vector3f vert, double camera) {
+    return Vector3f(
+        vert.x / (1 - vert.z / camera),
+        vert.y / (1 - vert.z / camera),
+        vert.z / (1 - vert.z / camera)
     );
 }
 

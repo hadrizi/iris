@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <cmath>
+#include <format>
 
 namespace iris {
 
@@ -25,11 +26,12 @@ constexpr pixel_t black  = 0x00000000;
 struct Canvas {
     size_t width, height;
     std::vector<pixel_t> pixels;
+    std::vector<uint8_t> depth_buffer;
 
     Canvas()
-        : width(0), height(0), pixels(0) {};
+        : width(0), height(0), pixels(0), depth_buffer(0) {};
     Canvas(size_t width_, size_t height_)
-        : width(width_), height(height_), pixels(width_ * height_, 0) {};
+        : width(width_), height(height_), pixels(width_ * height_, 0), depth_buffer(width_ * height_, 0) {};
         
     void put_pixel(pixel_t col, size_t idx) {
         if (idx >= pixels.size()) return;
@@ -41,8 +43,35 @@ struct Canvas {
         pixels[width * y + x] = col;
     }
 
+    /* 
+        do i really need these? if i do then why? should i change all methods accepting color to such thing?
+        maybe i should come up with a better struct for color? union?
+    */
+    void put_pixel(std::tuple<uint8_t> col, size_t idx) {
+        if (idx >= pixels.size()) return;
+        pixels[idx] = PIXEL_COL(std::get<0>(col), std::get<0>(col), std::get<0>(col), 255);
+    }
+
+    void put_pixel(std::tuple<uint8_t> col, int x, int y) {
+        if (!_is_in_bounds(x, y)) return;
+        pixels[width * y + x] = PIXEL_COL(std::get<0>(col), std::get<0>(col), std::get<0>(col), 255);
+    }
+
+    void put_pixel(std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> col, size_t idx) {
+        if (idx >= pixels.size()) return;
+        pixels[idx] = PIXEL_COL(
+            std::get<0>(col), std::get<1>(col), std::get<2>(col), std::get<3>(col));
+    }
+
+    void put_pixel(std::tuple<uint8_t, uint8_t, uint8_t, uint8_t> col, int x, int y) {
+        if (!_is_in_bounds(x, y)) return;
+        pixels[width * y + x] = PIXEL_COL(
+            std::get<0>(col), std::get<1>(col), std::get<2>(col), std::get<3>(col));
+    }
+
     void fill(pixel_t col) {
         std::fill(pixels.begin(), pixels.end(), col);
+        std::fill(depth_buffer.begin(), depth_buffer.end(), 0);
     }
 
     void line(pixel_t col, int x0, int y0, int x1, int y1) {
@@ -77,12 +106,19 @@ struct Canvas {
         }
     }
 
-    void triangle(pixel_t col, int x0, int y0, int x1, int y1, int x2, int y2, bool fill = false) {
-        line(col, x0, y0, x1, y1);
-        line(col, x1, y1, x2, y2);
-        line(col, x2, y2, x0, y0);
-
-        if (!fill) return;
+    void triangle(
+        pixel_t col,
+        int x0, int y0, int z0,
+        int x1, int y1, int z1,
+        int x2, int y2, int z2,
+        bool fill = false,
+        bool use_depth_color = false
+    ) {
+        if (!fill) {
+            line(col, x0, y0, x1, y1);
+            line(col, x1, y1, x2, y2);
+            line(col, x2, y2, x0, y0);
+        }
 
         int bbminx = std::min(std::min(x0, x1), x2);
         int bbminy = std::min(std::min(y0, y1), y2);
@@ -93,21 +129,23 @@ struct Canvas {
             rectangle(red, bbminx, bbminy, bbmaxx, bbmaxy);
         #endif
         
+        // barycentric coordinates are used to check if point is inside a triangle
         double triangle_area = _triangle_area(x0, y0, x1, y1, x2, y2);
         for (int xp = bbminx; xp <= bbmaxx; xp++) {
             for (int yp = bbminy; yp <= bbmaxy; yp++) {
-                // x:48 y:39
-                double subtriangle_area0 = _triangle_area(xp, yp, x1, y1, x2, y2);
-                double subtriangle_area1 = _triangle_area(xp, yp, x2, y2, x0, y0);
-                double subtriangle_area2 = _triangle_area(xp, yp, x0, y0, x1, y1);
+                double t0 = _triangle_area(xp, yp, x1, y1, x2, y2) / triangle_area;
+                double t1 = _triangle_area(xp, yp, x2, y2, x0, y0) / triangle_area;
+                double t2 = _triangle_area(xp, yp, x0, y0, x1, y1) / triangle_area;
+                if (t0 < 0 || t1 < 0 || t2 < 0) continue;
+                if (!_is_in_bounds(xp, yp)) continue;
 
-                if (
-                    subtriangle_area0 / triangle_area >= 0 &&
-                    subtriangle_area1 / triangle_area >= 0 &&
-                    subtriangle_area2 / triangle_area >= 0
-                ) {
-                    put_pixel(col, xp, yp);
-                }
+                uint8_t zp = static_cast<uint8_t>(z0 * t0 + z1 * t1 + z2 * t2);
+                if (zp <= depth_buffer[width * yp + xp]) continue;
+                
+                col = use_depth_color ? PIXEL_COL(zp, zp, zp, 255) : col;
+                
+                depth_buffer[width * yp + xp] = zp;
+                put_pixel(col, xp, yp);
             }
         }
 
@@ -128,7 +166,7 @@ struct Canvas {
         }
 
     }
-
+    
     void flip_horizontally() {
         // it's a hack for sure but it's cheap and it works
         std::reverse(pixels.begin(), pixels.end());
@@ -155,6 +193,15 @@ void output_canvas_to_image(const Canvas& canvas, const char* filename) {
 
     f.close();
 }
+
+void snapshot_canvas(Canvas& canvas, const char* prefix = "") {
+    static size_t snapshot_counter = 1;
+
+    canvas.flip_horizontally();
+    output_canvas_to_image(canvas, std::format("out/{}out{}.ppm", prefix, snapshot_counter++).c_str());
+    canvas.flip_horizontally();
+}
+
 
 } // iris
 
