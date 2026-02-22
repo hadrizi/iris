@@ -10,6 +10,8 @@
 #include <cmath>
 #include <format>
 
+#include "font.hpp"
+
 namespace iris {
 
 typedef uint32_t pixel_t;
@@ -62,6 +64,12 @@ struct Canvas {
     );
     void rectangle(pixel_t col, int x0, int y0, int x1, int y1, bool fill=false);
     
+    // ==================
+
+    // text
+
+    void draw_text(const char* text, pixel_t col, int x, int y, size_t size=1);
+
     // ==================
 
 private:

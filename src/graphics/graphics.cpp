@@ -109,12 +109,12 @@ void iris::Canvas::triangle(
 }
 
 void iris::Canvas::rectangle(pixel_t col, int x0, int y0, int x1, int y1, bool fill) {
-    line(col, x0, y0, x0, y1);
-    line(col, x0, y1, x1, y1);
-    line(col, x1, y1, x1, y0);
-    line(col, x1, y0, x0, y0);
-
-    if (!fill) return;
+    if (!fill) {        
+        line(col, x0, y0, x0, y1);
+        line(col, x0, y1, x1, y1);
+        line(col, x1, y1, x1, y0);
+        line(col, x1, y0, x0, y0);
+    };
 
     for (int x = x0; x <= x1; x++) {
         for (int y = y0; y <= y1; y++) {
@@ -122,6 +122,38 @@ void iris::Canvas::rectangle(pixel_t col, int x0, int y0, int x1, int y1, bool f
         }
     }
 
+}
+
+void iris::Canvas::draw_text(const char* text, pixel_t col, int x, int y, size_t size) {
+    char c = ' ';
+    size_t char_idx = 0;
+    while (c != '\0') {
+        c = text[char_idx];
+
+        glyph_t glyph_map = DEFAULT_FONT[c];
+        int offseted_x0, offseted_y0, offseted_x1, offseted_y1;
+
+        for (size_t i = 0; i < DEFAULT_FONT_HEIGHT; ++i) {
+            for (size_t j = 0; j < DEFAULT_FONT_WIDTH; ++j) {
+                offseted_x0 = x + (j * size) + (char_idx * size * DEFAULT_FONT_WIDTH);
+                offseted_y0 = y + (i * size);
+                offseted_x1 = offseted_x0 + (size - 1);
+                offseted_y1 = offseted_y0 + (size - 1);
+                
+                if (glyph_map[i][j] == 0) continue;
+
+                rectangle(
+                    col,
+                    offseted_x0, offseted_y0,
+                    offseted_x1, offseted_y1,
+                    true
+                );
+            }
+        }
+        
+        char_idx++;
+    }
+        
 }
 
 void iris::Canvas::flip_horizontally() {
