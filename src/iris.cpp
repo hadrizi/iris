@@ -6,6 +6,8 @@
 #include <tuple>
 #include <random>
 #include <format>
+#include <chrono>
+#include <thread>
 
 // #define IRIS_CANVAS_DEBUG
 
@@ -58,6 +60,10 @@ int main() {
     
     double angle_param = 0;
     double max_angle_param = 72;
+
+    const auto frame_time = std::chrono::nanoseconds(1'000'000'000LL / window.fps);
+    auto next_frame = std::chrono::steady_clock::now();
+    
     while(!window.closed) {
         canvas.fill(iris::black);
         draw_mesh(mesh, canvas, angle_param * (M_PI / 36));
@@ -67,5 +73,14 @@ int main() {
         
         angle_param++;
         if (angle_param > max_angle_param) angle_param = 0;
+
+        next_frame += frame_time;
+        auto now = std::chrono::steady_clock::now();
+
+        if (now < next_frame) {
+            std::this_thread::sleep_until(next_frame);
+        } else {
+            next_frame = now;
+        }
     }
 }

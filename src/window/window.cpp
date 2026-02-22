@@ -1,10 +1,10 @@
 #include "window.hpp"
 
 iris::IrisWindow::IrisWindow():
-    width(0), height(0), name("") { _x_init(); };
+    width(0), height(0), name(""), fps(0) { _x_init(); };
 
-iris::IrisWindow::IrisWindow(size_t width_, size_t height_, std::string name_):
-    width(width_), height(height_), name(name_) { _x_init(); };
+iris::IrisWindow::IrisWindow(size_t width_, size_t height_, std::string name_, uint8_t fps_):
+    width(width_), height(height_), name(name_), fps(fps_) { _x_init(); };
 
 iris::IrisWindow::~IrisWindow() { _x_destroy(); }
 

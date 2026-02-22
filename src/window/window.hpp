@@ -15,10 +15,12 @@ namespace iris {
 struct IrisWindow {
     size_t width, height;
     std::string name;
+    uint8_t fps;
+
     bool closed = false;
 
     IrisWindow();
-    IrisWindow(size_t width_, size_t height_, std::string name="Iris window");
+    IrisWindow(size_t width_, size_t height_, std::string name="Iris window", uint8_t fps_=30);
 
     ~IrisWindow();
     
