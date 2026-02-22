@@ -32,7 +32,7 @@ private:
     Atom              x_wm_delete_window;
     XSizeHints*       x_size_hints;
     GC                x_gc;
-    XWindowAttributes x_wa {0};
+    XImage*           x_window_image;
 
     void _x_init();
     void _x_destroy();

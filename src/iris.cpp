@@ -20,7 +20,7 @@ constexpr size_t height = 800;
 constexpr size_t far_plane = 255;
 constexpr double camera = 255.;
 
-void draw_mesh(iris::Mesh& mesh, iris::Canvas& canvas, iris::Canvas& depth_canvas, double angle) {
+void draw_mesh(iris::Mesh& mesh, iris::Canvas& canvas, double angle) {
     for (const auto& face: mesh.faces) {
         iris::Vector3i v0 = iris::project_vert_orthogonally(
             iris::project_vert_perspective(iris::rotate_vert_y(mesh.get_face_vert(face, 0), angle), camera),
@@ -41,44 +41,31 @@ void draw_mesh(iris::Mesh& mesh, iris::Canvas& canvas, iris::Canvas& depth_canva
 
         iris::pixel_t face_col = PIXEL_COL(255, 255, 255, 255);
 
-        canvas.triangle(face_col, v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, true);
-        depth_canvas.triangle(face_col, v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, true, true);
-        
-        // iris::snapshot_canvas(canvas);
-        // iris::snapshot_canvas(depth_canvas, "depth_");
+        // canvas.triangle(face_col, v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, true);
+        canvas.triangle(face_col, v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, true, true);
     }
 }
 
 int main() {
     iris::Mesh mesh;
-    mesh.load_from_obj("assets/cube.obj");
+    mesh.load_from_obj("assets/fixed_teapot.obj");
     mesh.transform_to_ndc();
 
     iris::Canvas canvas(width, height);
-    iris::Canvas depth_canvas(width, height);
-    
     canvas.fill(iris::black);
-    depth_canvas.fill(iris::black);
     
     iris::IrisWindow window(width, height);
     
     double angle_param = 0;
     double max_angle_param = 72;
     while(!window.closed) {
-        depth_canvas.fill(iris::black);
         canvas.fill(iris::black);
-        draw_mesh(mesh, canvas, depth_canvas, angle_param * (M_PI / 36));
-
-        canvas.flip_horizontally();
-        depth_canvas.flip_horizontally();
+        draw_mesh(mesh, canvas, angle_param * (M_PI / 36));
         
         window.handle_native_event();
-        window.draw_canvas(depth_canvas, 0, 0);
+        window.draw_canvas(canvas, 0, 0);
         
         angle_param++;
         if (angle_param > max_angle_param) angle_param = 0;
-
-        canvas.flip_horizontally();
-        depth_canvas.flip_horizontally();
     }
 }

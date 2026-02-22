@@ -20,7 +20,7 @@ std::ostream& iris::operator<<(std::ostream &os, Vector3<T> const &m) {
 iris::Vector3i iris::project_vert_orthogonally(Vector3f vert, size_t canvas_width, size_t canvas_height, size_t far_plane) {
     return Vector3i(
         canvas_width  / 2 * (vert.x + 1.),
-        canvas_height / 2 * (vert.y + 1.),
+        canvas_height / 2 * (1. - vert.y),
         far_plane     / 2 * (vert.z + 1.)
     );
 }

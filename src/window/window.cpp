@@ -35,8 +35,23 @@ void iris::IrisWindow::_x_init() {
 
     x_gc = XCreateGC(x_display, x_window, 0, NULL);
     // TODO: error check for x_gc
-
+    
+    XWindowAttributes x_wa{};
     XGetWindowAttributes(x_display, x_window, &x_wa);
+
+    x_window_image = XCreateImage(
+        x_display,
+        x_wa.visual,
+        x_wa.depth,
+        ZPixmap,
+        0,
+        NULL,
+        width,
+        height,
+        32,
+        width * sizeof(pixel_t)
+    );
+
 
     XStoreName(x_display, x_window, name.c_str());
     
@@ -55,6 +70,7 @@ void iris::IrisWindow::_x_init() {
 
 void iris::IrisWindow::_x_destroy() {
     XFree(x_size_hints);
+    XFree(x_window_image);
     XCloseDisplay(x_display);
 }
 
@@ -90,24 +106,10 @@ void iris::IrisWindow::_x_handle_event() {
 
 void iris::IrisWindow::_x_draw_canvas(Canvas& canvas, int offset_x, int offset_y) {
     if (canvas.pixels.size() <= 0) return;
+    x_window_image->data = (char*)&canvas.pixels[0];
 
-    XImage* window_image = XCreateImage(
-        x_display,
-        x_wa.visual,
-        x_wa.depth,
-        ZPixmap,
-        0,
-        (char*) &canvas.pixels[0],
-        canvas.width,
-        canvas.height,
-        32,
-        canvas.width * sizeof(canvas.pixels[0])
-    );
-    
     XPutImage(
-        x_display, x_window, x_gc, window_image, offset_x, offset_y, 0, 0, canvas.width, canvas.height);
-
-    XFree(window_image);
+        x_display, x_window, x_gc, x_window_image, offset_x, offset_y, 0, 0, canvas.width, canvas.height);
 }
 
 void iris::IrisWindow::_x_clear() {
