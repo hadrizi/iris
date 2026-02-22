@@ -9,9 +9,10 @@
 
 // #define IRIS_CANVAS_DEBUG
 
-#include "graphics.hpp"
-#include "math.hpp"
-#include "mesh.hpp"
+#include "graphics/graphics.hpp"
+#include "math/math.hpp"
+#include "mesh/mesh.hpp"
+#include "window/window.hpp"
 
 // Game configs; should be moved to some kind of Game object in the future
 constexpr size_t width  = 800;
@@ -59,14 +60,31 @@ int main() {
     canvas.fill(iris::black);
     depth_canvas.fill(iris::black);
 
-    double angle_param = 36;
-    for (int i = 0; i < angle_param * 2; ++i) {
-        draw_mesh(canvas, depth_canvas, (M_PI / angle_param) * i);
-        iris::snapshot_canvas(depth_canvas);
-    
-        depth_canvas.fill(iris::black);
-    }
+    // draw_mesh(canvas, depth_canvas, (M_PI / 6));    
 
-    // iris::output_canvas_to_image(depth_canvas, "out/out.ppm");
+    
+    // iris::output_canvas_to_image(canvas,       "out/out.ppm");
     // iris::output_canvas_to_image(depth_canvas, "out/depth_out.ppm");
+    
+    iris::IrisWindow window(width, height);
+    
+    double angle_param = 0;
+    double max_angle_param = 72;
+    while(!window.closed) {
+        depth_canvas.fill(iris::black);
+        canvas.fill(iris::black);
+        draw_mesh(canvas, depth_canvas, angle_param * (M_PI / 36));
+
+        canvas.flip_horizontally();
+        depth_canvas.flip_horizontally();
+        
+        window.handle_native_event();
+        window.draw_canvas(depth_canvas, 0, 0);
+        
+        angle_param++;
+        if (angle_param > max_angle_param) angle_param = 0;
+
+        canvas.flip_horizontally();
+        depth_canvas.flip_horizontally();
+    }
 }

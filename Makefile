@@ -1,13 +1,32 @@
 cc         = g++
 cc_version = 20
 cc_flags   = -g -fsanitize=address -fsanitize=leak -Wextra -Wall -pedantic -std=c++$(cc_version)
+cc_libs    = -lX11
 
 project       = iris
+source_folder = src/
 build_folder  = build/
 
-$(project):
+$(build_folder):
 	mkdir $(build_folder)
-	$(cc) $(cc_flags) -o $(build_folder)$(project) main.cpp
+
+$(build_folder)graphics.o: $(build_folder)
+	$(cc) $(cc_flags) -c -o $(build_folder)graphics.o $(source_folder)graphics/graphics.cpp
+
+$(build_folder)math.o: $(build_folder)
+	$(cc) $(cc_flags) -c -o $(build_folder)math.o $(source_folder)math/math.cpp
+
+$(build_folder)mesh.o: $(build_folder)
+	$(cc) $(cc_flags) -c -o $(build_folder)mesh.o $(source_folder)mesh/mesh.cpp
+
+$(build_folder)window.o: $(build_folder)
+	$(cc) $(cc_flags) -c -o $(build_folder)window.o $(source_folder)window/window.cpp
+
+$(build_folder)$(project).o: $(build_folder)
+	$(cc) $(cc_flags) -c -o $(build_folder)$(project).o $(source_folder)$(project).cpp
+
+$(project): $(build_folder)$(project).o $(build_folder)graphics.o $(build_folder)math.o $(build_folder)mesh.o $(build_folder)window.o
+	$(cc) $(cc_flags) $(cc_libs) -o $(build_folder)$(project) $(build_folder)$(project).o $(build_folder)graphics.o $(build_folder)math.o $(build_folder)mesh.o $(build_folder)window.o
 
 all: $(project)
 
