@@ -64,25 +64,27 @@ void iris::IrisWindow::_x_on_delete() {
 }
 
 void iris::IrisWindow::_x_handle_event() {
-    XEvent x_event;
-    XNextEvent(x_display, &x_event);
-        
-    switch (x_event.type) {
-    case ClientMessage:
-        if((Atom)x_event.xclient.data.l[0] == x_wm_delete_window) {
-            _x_on_delete();
+    while (XPending(x_display) > 0) {
+        XEvent x_event;
+        XNextEvent(x_display, &x_event);
+            
+        switch (x_event.type) {
+        case ClientMessage:
+            if((Atom)x_event.xclient.data.l[0] == x_wm_delete_window) {
+                _x_on_delete();
+            }
+            break;
+        case ConfigureNotify:
+            // WSLg hack to disable resizing
+            // see https://github.com/microsoft/wslg/issues/1223
+            if ((size_t)x_event.xconfigure.width != width || (size_t)x_event.xconfigure.height != height) {
+                XResizeWindow(x_display, x_window, width, height);
+                XFlush(x_display);
+            }
+            break;
+        default:
+            break;
         }
-        break;
-    case ConfigureNotify:
-        // WSLg hack to disable resizing
-        // see https://github.com/microsoft/wslg/issues/1223
-        if ((size_t)x_event.xconfigure.width != width || (size_t)x_event.xconfigure.height != height) {
-            XResizeWindow(x_display, x_window, width, height);
-            XFlush(x_display);
-        }
-        break;
-    default:
-        break;
     }
 }
 

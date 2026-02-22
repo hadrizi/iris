@@ -20,11 +20,7 @@ constexpr size_t height = 800;
 constexpr size_t far_plane = 255;
 constexpr double camera = 255.;
 
-void draw_mesh(iris::Canvas& canvas, iris::Canvas& depth_canvas, double angle) {
-    iris::Mesh mesh;
-    mesh.load_from_obj("assets/fixed_teapot.obj");
-    mesh.transform_to_ndc();
-    
+void draw_mesh(iris::Mesh& mesh, iris::Canvas& canvas, iris::Canvas& depth_canvas, double angle) {
     for (const auto& face: mesh.faces) {
         iris::Vector3i v0 = iris::project_vert_orthogonally(
             iris::project_vert_perspective(iris::rotate_vert_y(mesh.get_face_vert(face, 0), angle), camera),
@@ -39,11 +35,11 @@ void draw_mesh(iris::Canvas& canvas, iris::Canvas& depth_canvas, double angle) {
             canvas.width, canvas.height, far_plane
         );
 
-        std::random_device dev;
-        std::mt19937 rng(dev());
-        std::uniform_int_distribution<std::mt19937::result_type> rnd(0, 255);
+        // std::random_device dev;
+        // std::mt19937 rng(dev());
+        // std::uniform_int_distribution<std::mt19937::result_type> rnd(0, 255);
 
-        iris::pixel_t face_col = PIXEL_COL(rnd(rng), rnd(rng), rnd(rng), 255);
+        iris::pixel_t face_col = PIXEL_COL(255, 255, 255, 255);
 
         canvas.triangle(face_col, v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, true);
         depth_canvas.triangle(face_col, v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, true, true);
@@ -54,17 +50,15 @@ void draw_mesh(iris::Canvas& canvas, iris::Canvas& depth_canvas, double angle) {
 }
 
 int main() {
+    iris::Mesh mesh;
+    mesh.load_from_obj("assets/cube.obj");
+    mesh.transform_to_ndc();
+
     iris::Canvas canvas(width, height);
     iris::Canvas depth_canvas(width, height);
     
     canvas.fill(iris::black);
     depth_canvas.fill(iris::black);
-
-    // draw_mesh(canvas, depth_canvas, (M_PI / 6));    
-
-    
-    // iris::output_canvas_to_image(canvas,       "out/out.ppm");
-    // iris::output_canvas_to_image(depth_canvas, "out/depth_out.ppm");
     
     iris::IrisWindow window(width, height);
     
@@ -73,7 +67,7 @@ int main() {
     while(!window.closed) {
         depth_canvas.fill(iris::black);
         canvas.fill(iris::black);
-        draw_mesh(canvas, depth_canvas, angle_param * (M_PI / 36));
+        draw_mesh(mesh, canvas, depth_canvas, angle_param * (M_PI / 36));
 
         canvas.flip_horizontally();
         depth_canvas.flip_horizontally();
