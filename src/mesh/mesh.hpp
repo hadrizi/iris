@@ -17,6 +17,7 @@ typedef std::tuple<size_t, size_t, size_t> face_t;
 struct Mesh {
     std::vector<iris::Vector3f> vertices;
     std::vector<face_t> faces;
+    std::string name;
 
     Mesh();
 

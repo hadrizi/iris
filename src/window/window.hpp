@@ -24,7 +24,7 @@ struct IrisWindow {
 
     ~IrisWindow();
     
-    void handle_native_event();
+    XEvent handle_native_event();
     void draw_canvas(iris::Canvas& canvas, int offset_x, int offset_y);
     void clear();
 private:
@@ -38,7 +38,7 @@ private:
 
     void _x_init();
     void _x_destroy();
-    void _x_handle_event();
+    XEvent _x_handle_event();
     void _x_on_delete();
     void _x_draw_canvas(iris::Canvas& canvas, int offset_x, int offset_y);
     void _x_clear();

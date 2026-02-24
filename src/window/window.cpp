@@ -8,8 +8,8 @@ iris::IrisWindow::IrisWindow(size_t width_, size_t height_, std::string name_, u
 
 iris::IrisWindow::~IrisWindow() { _x_destroy(); }
 
-void iris::IrisWindow::handle_native_event() {
-    _x_handle_event();
+XEvent iris::IrisWindow::handle_native_event() {
+    return _x_handle_event();
 }
 
 void iris::IrisWindow::draw_canvas(Canvas& canvas, int offset_x, int offset_y) {
@@ -62,7 +62,7 @@ void iris::IrisWindow::_x_init() {
     XSetWMNormalHints(x_display, x_window, x_size_hints);
 
     XMapWindow(x_display, x_window);
-    XSelectInput(x_display, x_window, StructureNotifyMask);
+    XSelectInput(x_display, x_window, StructureNotifyMask | KeyPressMask);
 
     x_wm_delete_window = XInternAtom(x_display, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(x_display, x_window, &x_wm_delete_window, 1);
@@ -79,7 +79,7 @@ void iris::IrisWindow::_x_on_delete() {
     closed = true;
 }
 
-void iris::IrisWindow::_x_handle_event() {
+XEvent iris::IrisWindow::_x_handle_event() {
     while (XPending(x_display) > 0) {
         XEvent x_event;
         XNextEvent(x_display, &x_event);
@@ -99,9 +99,11 @@ void iris::IrisWindow::_x_handle_event() {
             }
             break;
         default:
-            break;
+            return x_event;
         }
     }
+
+    return XEvent{};
 }
 
 void iris::IrisWindow::_x_draw_canvas(Canvas& canvas, int offset_x, int offset_y) {

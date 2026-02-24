@@ -16,16 +16,44 @@
 #include "mesh/mesh.hpp"
 #include "window/window.hpp"
 
-const char* model_name = "assets/fixed_teapot.obj";
-
 // game configs; should be moved to some kind of Game object in the future
-constexpr size_t width  = 800;
-constexpr size_t height = 800;
+constexpr size_t width  = 1000;
+constexpr size_t height = 1000;
 constexpr size_t far_plane = 255;
 constexpr double camera = 255.;
 constexpr int font_size = 3;
 
-void draw_mesh(iris::Mesh& mesh, iris::Canvas& canvas, double angle) {
+std::string mesh_filenames[4] = {
+    "assets/african_head.obj",
+    "assets/cube.obj",
+    "assets/smaller_monkey.obj",
+    "assets/fixed_teapot.obj"
+};
+
+struct MeshQueue {
+    std::vector<iris::Mesh> meshes;
+
+    MeshQueue(const std::string mesh_filenames[], size_t mesh_filenames_amount) {
+        for (size_t i = 0; i < mesh_filenames_amount; ++i) {
+            iris::Mesh mesh;
+            mesh.load_from_obj(mesh_filenames[i].c_str());
+            mesh.transform_to_ndc();
+            
+            meshes.push_back(mesh);
+        }
+    }
+
+    iris::Mesh get_current() { return meshes[current_mesh_idx]; }
+    void next() {
+        current_mesh_idx++;
+        if (current_mesh_idx >= meshes.size()) current_mesh_idx = 0;
+    }
+
+private:
+    size_t current_mesh_idx = 0;
+};
+
+void draw_mesh(const iris::Mesh& mesh, iris::Canvas& canvas, double angle) {
     for (const auto& face: mesh.faces) {
         iris::Vector3i v0 = iris::project_vert_orthogonally(
             iris::project_vert_perspective(iris::rotate_vert_y(mesh.get_face_vert(face, 0), angle), camera),
@@ -52,9 +80,7 @@ void draw_mesh(iris::Mesh& mesh, iris::Canvas& canvas, double angle) {
 }
 
 void test_mesh_rendering() {
-    iris::Mesh mesh;
-    mesh.load_from_obj(model_name);
-    mesh.transform_to_ndc();
+    MeshQueue mesh_queue(mesh_filenames, 4);
 
     iris::IrisWindow window(width, height, "mesh test", 60);
     iris::Canvas canvas(window.width, window.height);    
@@ -77,15 +103,16 @@ void test_mesh_rendering() {
         previous_time = current_time;
 
         // events
-        window.handle_native_event();
+        auto event = window.handle_native_event();
         
         // logic update
         angle_param += rotation_speed * delta_time;
         
         // rendering
         canvas.fill(iris::black);
-        draw_mesh(mesh, canvas, angle_param);
+        draw_mesh(mesh_queue.get_current(), canvas, angle_param);
 
+        // todo add gui objects(labels, containers, etc.)
         canvas.draw_text(
             std::format("fps: {}", current_fps).c_str(),
             iris::white,
@@ -93,7 +120,7 @@ void test_mesh_rendering() {
             font_size
         );
         canvas.draw_text(
-            std::format("model: {}", model_name).c_str(), 
+            std::format("model: {}", mesh_queue.get_current().name).c_str(), 
             iris::white,
             10, 10 + 1 * (font_size * iris::DEFAULT_FONT_HEIGHT) + (10 * 1),
             font_size
@@ -106,6 +133,17 @@ void test_mesh_rendering() {
         );
         
         window.draw_canvas(canvas, 0, 0);
+
+        // handle events
+        if (event.type == KeyPress) {
+            switch (XLookupKeysym(&event.xkey, 0)) {
+                case 'e':
+                    mesh_queue.next();
+                    break;
+                default:
+                    break;
+            }
+        }
 
         // fps counting
         frame_counter++;

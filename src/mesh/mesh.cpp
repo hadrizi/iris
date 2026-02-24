@@ -5,6 +5,7 @@ iris::Mesh::Mesh(): vertices(0), faces(0) {}
 void iris::Mesh::load_from_obj(const char* filename) {
     vertices.clear();
     faces.clear();
+    name = "";
     
     std::ifstream obj_f(filename);
     std::string line;
@@ -38,6 +39,8 @@ void iris::Mesh::load_from_obj(const char* filename) {
             faces.push_back({v0, v1, v2});
         }    
     }
+
+    name = filename;
 }
 
 void iris::Mesh::transform_to_ndc() {
