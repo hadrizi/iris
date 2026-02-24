@@ -72,11 +72,11 @@ void iris::IrisWindow::_x_destroy() {
     XFree(x_size_hints);
     XFree(x_window_image);
     XFreeGC(x_display, x_gc);
+    XDestroyWindow(x_display, x_window);
     XCloseDisplay(x_display);
 }
 
 void iris::IrisWindow::_x_on_delete() {
-    XDestroyWindow(x_display, x_window);
     closed = true;
 }
 

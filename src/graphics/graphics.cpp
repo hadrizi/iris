@@ -182,8 +182,5 @@ void iris::output_canvas_to_image(const Canvas& canvas, const char* filename) {
 
 void iris::snapshot_canvas(Canvas& canvas, const char* prefix) {
     static size_t snapshot_counter = 1;
-
-    canvas.flip_horizontally();
     output_canvas_to_image(canvas, std::format("out/{}out{}.ppm", prefix, snapshot_counter++).c_str());
-    canvas.flip_horizontally();
 }

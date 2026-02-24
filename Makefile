@@ -4,7 +4,7 @@ cc_flags_debug   = -g -fsanitize=address -fsanitize=leak -Wextra -Wall -pedantic
 cc_flags_release = -O3 -Wextra -Wall -pedantic -std=c++$(cc_version)
 cc_libs          = -lX11
 
-build_mode = release
+build_mode = debug
 
 project       = iris
 source_folder = src/
