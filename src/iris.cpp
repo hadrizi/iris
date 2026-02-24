@@ -43,14 +43,20 @@ struct MeshQueue {
         }
     }
 
-    iris::Mesh get_current() { return meshes[current_mesh_idx]; }
+    const iris::Mesh& get_current() { return meshes[current_mesh_idx]; }
+    
     void next() {
         current_mesh_idx++;
-        if (current_mesh_idx >= meshes.size()) current_mesh_idx = 0;
+        if ((size_t)current_mesh_idx >= meshes.size()) current_mesh_idx = 0;
+    }
+    
+    void prev() {
+        current_mesh_idx--;
+        if (current_mesh_idx < 0) current_mesh_idx = meshes.size() - 1;
     }
 
 private:
-    size_t current_mesh_idx = 0;
+    int current_mesh_idx = 0;
 };
 
 void draw_mesh(const iris::Mesh& mesh, iris::Canvas& canvas, double angle) {
@@ -139,6 +145,12 @@ void test_mesh_rendering() {
             switch (XLookupKeysym(&event.xkey, 0)) {
                 case 'e':
                     mesh_queue.next();
+                    break;
+                case 'q':
+                    mesh_queue.prev();
+                    break;
+                case XK_Escape:
+                    window.closed = true;
                     break;
                 default:
                     break;

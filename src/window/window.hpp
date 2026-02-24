@@ -24,10 +24,16 @@ struct IrisWindow {
 
     ~IrisWindow();
     
+    // platform agnostic interface
+
     XEvent handle_native_event();
     void draw_canvas(iris::Canvas& canvas, int offset_x, int offset_y);
     void clear();
+
+    // ===========================
 private:
+    // X11
+
     Display*          x_display;
     Window            x_root_window;
     Window            x_window;
@@ -42,6 +48,8 @@ private:
     void _x_on_delete();
     void _x_draw_canvas(iris::Canvas& canvas, int offset_x, int offset_y);
     void _x_clear();
+
+    // ===============================
 }; // Window
 
 } // iris

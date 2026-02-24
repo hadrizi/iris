@@ -1,7 +1,7 @@
 cc               = g++
 cc_version       = 20
 cc_flags_debug   = -g -fsanitize=address -fsanitize=leak -Wextra -Wall -pedantic -std=c++$(cc_version)
-cc_flags_release = -O3 -fsanitize=address -fsanitize=leak -Wextra -Wall -pedantic -std=c++$(cc_version)
+cc_flags_release = -O3 -Wextra -Wall -pedantic -std=c++$(cc_version)
 cc_libs          = -lX11
 
 build_mode = release
@@ -30,7 +30,7 @@ $(build_folder)$(project).o: $(build_folder)
 	$(cc) $(cc_flags_$(build_mode)) -c -o $(build_folder)$(project).o $(source_folder)$(project).cpp
 
 $(project): $(build_folder)$(project).o $(build_folder)graphics.o $(build_folder)math.o $(build_folder)mesh.o $(build_folder)window.o
-	$(cc) $(cc_flags_$(build_mode)) $(cc_libs) -o $(build_folder)$(project) $(build_folder)$(project).o $(build_folder)graphics.o $(build_folder)math.o $(build_folder)mesh.o $(build_folder)window.o
+	$(cc) $(cc_flags_$(build_mode)) $(build_folder)$(project).o $(build_folder)graphics.o $(build_folder)math.o $(build_folder)mesh.o $(build_folder)window.o $(cc_libs) -o $(build_folder)$(project) 
 
 all: $(project)
 

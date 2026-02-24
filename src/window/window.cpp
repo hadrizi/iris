@@ -71,6 +71,7 @@ void iris::IrisWindow::_x_init() {
 void iris::IrisWindow::_x_destroy() {
     XFree(x_size_hints);
     XFree(x_window_image);
+    XFreeGC(x_display, x_gc);
     XCloseDisplay(x_display);
 }
 

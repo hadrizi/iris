@@ -75,6 +75,7 @@ void iris::Canvas::triangle(
         line(col, x0, y0, x1, y1);
         line(col, x1, y1, x2, y2);
         line(col, x2, y2, x0, y0);
+        return;
     }
 
     int bbminx = std::min(std::min(x0, x1), x2);
@@ -114,6 +115,7 @@ void iris::Canvas::rectangle(pixel_t col, int x0, int y0, int x1, int y1, bool f
         line(col, x0, y1, x1, y1);
         line(col, x1, y1, x1, y0);
         line(col, x1, y0, x0, y0);
+        return;
     };
 
     for (int x = x0; x <= x1; x++) {
@@ -125,12 +127,9 @@ void iris::Canvas::rectangle(pixel_t col, int x0, int y0, int x1, int y1, bool f
 }
 
 void iris::Canvas::draw_text(const char* text, pixel_t col, int x, int y, size_t size) {
-    char c = ' ';
     size_t char_idx = 0;
-    while (c != '\0') {
-        c = text[char_idx];
-
-        glyph_t glyph_map = DEFAULT_FONT[c];
+    while (text[char_idx] != '\0') {
+        glyph_t glyph_map = DEFAULT_FONT[text[char_idx]];
         int offseted_x0, offseted_y0, offseted_x1, offseted_y1;
 
         for (size_t i = 0; i < DEFAULT_FONT_HEIGHT; ++i) {
