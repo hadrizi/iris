@@ -1,14 +1,14 @@
 #include "window.hpp"
 
 iris::IrisWindow::IrisWindow():
-    width(0), height(0), name(""), fps(0) { _x_init(); };
+    width(0), height(0), name(""), target_fps(0) { _x_init(); };
 
 iris::IrisWindow::IrisWindow(size_t width_, size_t height_, std::string name_, uint8_t fps_):
-    width(width_), height(height_), name(name_), fps(fps_) { _x_init(); };
+    width(width_), height(height_), name(name_), target_fps(fps_) { _x_init(); };
 
 iris::IrisWindow::~IrisWindow() { _x_destroy(); }
 
-XEvent iris::IrisWindow::handle_native_event() {
+XEvent iris::IrisWindow::handle_events() {
     return _x_handle_event();
 }
 
@@ -18,6 +18,48 @@ void iris::IrisWindow::draw_canvas(Canvas& canvas, int offset_x, int offset_y) {
 
 void iris::IrisWindow::clear() {
     _x_clear();
+}
+
+void iris::IrisWindow::update(std::function<void(double, XEvent, IrisWindow*)> client_update) {
+    const auto frame_time = std::chrono::nanoseconds(1'000'000'000LL / target_fps);
+    auto next_frame = std::chrono::steady_clock::now();
+
+    int frame_counter = 0;
+    auto fps_timer = std::chrono::steady_clock::now();
+
+    auto previous_time = std::chrono::steady_clock::now();
+    while(!closed) {
+        auto current_time = std::chrono::steady_clock::now();
+        double delta_time = std::chrono::duration<double>(current_time - previous_time).count();
+        previous_time = current_time;
+
+        // events
+        // todo: event wrapper
+        XEvent event = handle_events();
+        
+        // logic update
+        client_update(delta_time, event, this);
+
+        // fps counting
+        frame_counter++;
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - fps_timer);
+        if (elapsed.count() >= 1)
+        {
+            current_fps = frame_counter;
+            frame_counter = 0;
+            fps_timer = now;
+        }
+
+        // frame cap
+        next_frame += frame_time;
+        if (now < next_frame) {
+            std::this_thread::sleep_until(next_frame);
+        } else {
+            next_frame = now;
+        }
+    }
+
 }
 
 // X11
@@ -76,7 +118,7 @@ void iris::IrisWindow::_x_destroy() {
     XCloseDisplay(x_display);
 }
 
-void iris::IrisWindow::_x_on_delete() {
+void iris::IrisWindow::_x_on_delete_atom() {
     closed = true;
 }
 
@@ -88,7 +130,7 @@ XEvent iris::IrisWindow::_x_handle_event() {
         switch (x_event.type) {
         case ClientMessage:
             if((Atom)x_event.xclient.data.l[0] == x_wm_delete_window) {
-                _x_on_delete();
+                _x_on_delete_atom();
             }
             break;
         case ConfigureNotify:

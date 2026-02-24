@@ -2,6 +2,9 @@
 #define IRIS_WINDOW_H_
 
 #include <string>
+#include <chrono>
+#include <thread>
+#include <functional>
 
 #include <stddef.h>
 
@@ -15,20 +18,24 @@ namespace iris {
 struct IrisWindow {
     size_t width, height;
     std::string name;
-    uint8_t fps;
+
+    uint8_t target_fps;
+    uint8_t current_fps = target_fps;
 
     bool closed = false;
 
     IrisWindow();
-    IrisWindow(size_t width_, size_t height_, std::string name="Iris window", uint8_t fps_=30);
+    IrisWindow(size_t width_, size_t height_, std::string name="Iris Window", uint8_t fps_=30);
 
     ~IrisWindow();
     
     // platform agnostic interface
 
-    XEvent handle_native_event();
+    XEvent handle_events();
     void draw_canvas(iris::Canvas& canvas, int offset_x, int offset_y);
     void clear();
+
+    void update(std::function<void(double, XEvent, IrisWindow*)> client_update);
 
     // ===========================
 private:
@@ -45,7 +52,7 @@ private:
     void _x_init();
     void _x_destroy();
     XEvent _x_handle_event();
-    void _x_on_delete();
+    void _x_on_delete_atom();
     void _x_draw_canvas(iris::Canvas& canvas, int offset_x, int offset_y);
     void _x_clear();
 
