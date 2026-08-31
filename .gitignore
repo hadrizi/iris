@@ -1,6 +1,8 @@
-build/*
-.vscode/*
+build/
+.vscode/
+out/
+*_docs/
+
 log.txt
 *.ppm
-out/*
 *.gif
