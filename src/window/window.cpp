@@ -104,7 +104,7 @@ void iris::IrisWindow::_x_init() {
     XSetWMNormalHints(x_display, x_window, x_size_hints);
 
     XMapWindow(x_display, x_window);
-    XSelectInput(x_display, x_window, StructureNotifyMask | KeyPressMask);
+    XSelectInput(x_display, x_window, StructureNotifyMask | KeyPressMask | KeyReleaseMask);
 
     x_wm_delete_window = XInternAtom(x_display, "WM_DELETE_WINDOW", False);
     XSetWMProtocols(x_display, x_window, &x_wm_delete_window, 1);

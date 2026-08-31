@@ -16,11 +16,11 @@ namespace iris {
 
 typedef uint32_t pixel_t;
 
-#define PIXEL_COL(r, g, b, a) ((uint32_t)(((uint8_t)a << 24) | ((uint8_t)r << 16) | ((uint8_t)g << 8) | (uint8_t)b))
-#define PIXEL_RED(p)   ((uint8_t)((uint32_t)p >> 16))
-#define PIXEL_GREEN(p) ((uint8_t)((uint32_t)p >> 8))
-#define PIXEL_BLUE(p)  ((uint8_t)((uint32_t)p))
-#define PIXEL_ALPHA(p) ((uint8_t)((uint32_t)p >> 24))
+#define PIXEL_COL(r, g, b, a) ((uint32_t)(((uint8_t)(a) << 24) | ((uint8_t)(r) << 16) | ((uint8_t)(g) << 8) | (uint8_t)(b)))
+#define PIXEL_RED(p)   ((uint8_t)((uint32_t)(p) >> 16))
+#define PIXEL_GREEN(p) ((uint8_t)((uint32_t)(p) >> 8))
+#define PIXEL_BLUE(p)  ((uint8_t)((uint32_t)(p)))
+#define PIXEL_ALPHA(p) ((uint8_t)((uint32_t)(p) >> 24))
 
 // Helper color consts
 
@@ -35,7 +35,7 @@ constexpr pixel_t black  = 0xFF000000;
 struct Canvas {
     size_t width, height;
     std::vector<pixel_t> pixels;
-    std::vector<uint8_t> depth_buffer;
+    std::vector<double> depth_buffer;
 
     Canvas();
     Canvas(size_t width_, size_t height_);
@@ -56,11 +56,10 @@ struct Canvas {
     
     void triangle(
         pixel_t col,
-        int x0, int y0, int z0,
-        int x1, int y1, int z1,
-        int x2, int y2, int z2,
-        bool fill=false,
-        bool use_depth_color=false
+        int x0, int y0, double z0,
+        int x1, int y1, double z1,
+        int x2, int y2, double z2,
+        bool fill=false
     );
     void rectangle(pixel_t col, int x0, int y0, int x1, int y1, bool fill=false);
     

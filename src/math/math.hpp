@@ -34,9 +34,14 @@ typedef Vector3<int>    Vector3i;
 typedef Vector3<double> Vector3f;
 
 // TODO: should be a part of the future Scene object prolly
-Vector3i project_vert_orthogonally(Vector3f vert, size_t canvas_width, size_t canvas_height, size_t far_plane);
+Vector3i screen(Vector3f vert, size_t canvas_width, size_t canvas_height, size_t far_plane);
+Vector2i screen2(Vector2f vert, size_t canvas_width, size_t canvas_height);
+Vector2f project(Vector3f vert);
+Vector3f perspective(Vector3f vert, double camera);
+
 Vector3f rotate_vert_y(Vector3f vert, double angle);
-Vector3f project_vert_perspective(Vector3f vert, double camera);
+Vector3f translate_vert_z(Vector3f vert, double dz);
+Vector3f translate_vert_y(Vector3f vert, double dy);
 
 } // iris
 

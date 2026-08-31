@@ -65,11 +65,10 @@ void iris::Canvas::line(pixel_t col, int x0, int y0, int x1, int y1) {
 
 void iris::Canvas::triangle(
     pixel_t col,
-    int x0, int y0, int z0,
-    int x1, int y1, int z1,
-    int x2, int y2, int z2,
-    bool fill,
-    bool use_depth_color
+    int x0, int y0, double z0,
+    int x1, int y1, double z1,
+    int x2, int y2, double z2,
+    bool fill
 ) {
     if (!fill) {
         line(col, x0, y0, x1, y1);
@@ -97,11 +96,9 @@ void iris::Canvas::triangle(
             if (t0 < 0 || t1 < 0 || t2 < 0) continue;
             if (!_is_in_bounds(xp, yp)) continue;
 
-            uint8_t zp = static_cast<uint8_t>(z0 * t0 + z1 * t1 + z2 * t2);
+            double zp = (1/z0 * t0 + 1/z1 * t1 + 1/z2 * t2);
             if (zp <= depth_buffer[width * yp + xp]) continue;
-            
-            col = use_depth_color ? PIXEL_COL(zp, zp, zp, 255) : col;
-            
+                        
             depth_buffer[width * yp + xp] = zp;
             put_pixel(col, xp, yp);
         }

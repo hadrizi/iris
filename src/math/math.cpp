@@ -17,23 +17,56 @@ std::ostream& iris::operator<<(std::ostream &os, Vector3<T> const &m) {
 }
 
 // TODO: should be a part of the future Scene object prolly
-iris::Vector3i iris::project_vert_orthogonally(Vector3f vert, size_t canvas_width, size_t canvas_height, size_t far_plane) {
+iris::Vector3i iris::screen(Vector3f vert, size_t canvas_width, size_t canvas_height, size_t far_plane) {
     return Vector3i(
-        canvas_width  / 2 * (vert.x + 1.),
-        canvas_height / 2 * (1. - vert.y),
-        far_plane     / 2 * (vert.z + 1.)
+        (vert.x + 1.) / 2 * canvas_width,
+        (1. - vert.y) / 2 * canvas_height,
+        (vert.z + 1.) / 2 * far_plane
+    );
+}
+
+iris::Vector2i iris::screen2(Vector2f vert, size_t canvas_width, size_t canvas_height) {
+    return Vector2i(
+        (vert.x + 1.) / 2 * canvas_width,
+        (1. - vert.y) / 2 * canvas_height
+    );
+}
+
+iris::Vector2f iris::project(Vector3f vert) {
+    return Vector2f(
+        vert.x / vert.z,
+        vert.y / vert.z
     );
 }
 
 iris::Vector3f iris::rotate_vert_y(Vector3f vert, double angle) {
+    double s = sin(angle);
+    double c = cos(angle);
     return Vector3f(
-         cos(angle) * vert.x + sin(angle) * vert.z,
-         vert.y,
-        -sin(angle) * vert.x + cos(angle) * vert.z
+        c * vert.x + s * vert.z,
+        vert.y,
+        s * vert.x - c * vert.z
     );
 }
 
-iris::Vector3f iris::project_vert_perspective(Vector3f vert, double camera) {
+iris::Vector3f iris::translate_vert_z(Vector3f vert, double dz) {
+    return Vector3f(
+        vert.x,
+        vert.y,
+        vert.z + dz
+    );
+}
+
+iris::Vector3f iris::translate_vert_y(Vector3f vert, double dy) {
+    return Vector3f(
+        vert.x,
+        vert.y + dy,
+        vert.z
+    );
+}
+
+
+iris::Vector3f iris::perspective(Vector3f vert, double camera) {
     return Vector3f(
         vert.x / (1 - vert.z / camera),
         vert.y / (1 - vert.z / camera),
