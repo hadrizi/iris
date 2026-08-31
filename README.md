@@ -8,6 +8,13 @@ iris is a small software renderer in pure C developed as a hobby project to bett
 - Perspective projection
 - Simple pixel font rendering
 
+## Controls
+- `E` and `Q` - change model
+- `WASD` move camera up, left, down, right
+- Up and Down arrow keys - move camera front or back
+- Left and Right arrow keys - rotate model
+- `B` - enable debug view
+
 ## Platform
 The project was built on `x86_64-pc-linux-gnu` using `g++ 13.3.0`
 
