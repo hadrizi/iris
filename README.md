@@ -1,5 +1,5 @@
 # iris
-iris is a small software renderer in pure C developed as a hobby project to better understand how rendering works.
+iris is a small software renderer in pure C++ developed as a hobby project to better understand how rendering works.
 
 ## Features
 - OBJ models rendering
